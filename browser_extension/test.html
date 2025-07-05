@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Detector - Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .mkp-card { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 16px; 
+            margin: 20px 0; 
+            background: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .mkp-card h3 { margin-top: 0; color: #ff9800; }
+        .mkp-card .card-content { margin: 10px 0; }
+        .mkp-card .card-meta { font-size: 0.9em; color: #666; }
+        .section { margin: 30px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Card Detector Test Page</h1>
+    <p>This page contains multiple mkp-card divs to test the Card Detector extension.</p>
+    
+    <div class="section">
+        <h2>Debit Card Transactions</h2>
+        <div class="mkp-card mkp-card-debit">
+            <h3>Purchase at Grocery Store</h3>
+            <div class="card-content">
+                <p><strong>Amount:</strong> -$87.45</p>
+                <p><strong>Date:</strong> 2025-07-05</p>
+                <p><strong>Merchant:</strong> Fresh Market</p>
+                <p><strong>Category:</strong> Groceries</p>
+            </div>
+            <div class="card-meta">Transaction ID: DB001234</div>
+        </div>
+        
+        <div class="mkp-card mkp-card-debit">
+            <h3>ATM Withdrawal</h3>
+            <div class="card-content">
+                <p><strong>Amount:</strong> -$100.00</p>
+                <p><strong>Date:</strong> 2025-07-04</p>
+                <p><strong>Location:</strong> Bank of America ATM</p>
+                <p><strong>Fee:</strong> $2.50</p>
+            </div>
+            <div class="card-meta">Transaction ID: DB001235</div>
+        </div>
+
+        <div class="mkp-card mkp-card-debit">
+            <h3>Gas Station Purchase</h3>
+            <div class="card-content">
+                <p><strong>Amount:</strong> -$45.20</p>
+                <p><strong>Date:</strong> 2025-07-03</p>
+                <p><strong>Merchant:</strong> Shell Gas Station</p>
+                <p><strong>Category:</strong> Transportation</p>
+            </div>
+            <div class="card-meta">Transaction ID: DB001236</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Other Cards (Not Debit - Should NOT be highlighted)</h2>
+        <div class="mkp-card">
+            <h3>John Doe</h3>
+            <div class="card-content">
+                <p><strong>Age:</strong> 25</p>
+                <p><strong>City:</strong> New York</p>
+                <p><strong>Occupation:</strong> Software Developer</p>
+            </div>
+            <div class="card-meta">Member since: 2020</div>
+        </div>
+        
+        <div class="mkp-card">
+            <h3>Jane Smith</h3>
+            <div class="card-content">
+                <p><strong>Age:</strong> 30</p>
+                <p><strong>City:</strong> San Francisco</p>
+                <p><strong>Occupation:</strong> Product Manager</p>
+            </div>
+            <div class="card-meta">Member since: 2019</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Product Cards</h2>
+        <div class="mkp-card">
+            <h3>MacBook Pro</h3>
+            <div class="card-content">
+                <p><strong>Price:</strong> $1,999</p>
+                <p><strong>Stock:</strong> 15 units</p>
+                <p><strong>Category:</strong> Electronics</p>
+                <p><strong>Rating:</strong> 4.8/5</p>
+            </div>
+            <div class="card-meta">Last updated: Today</div>
+        </div>
+        
+        <div class="mkp-card">
+            <h3>iPhone 15</h3>
+            <div class="card-content">
+                <p><strong>Price:</strong> $799</p>
+                <p><strong>Stock:</strong> 32 units</p>
+                <p><strong>Category:</strong> Electronics</p>
+                <p><strong>Rating:</strong> 4.7/5</p>
+            </div>
+            <div class="card-meta">Last updated: Yesterday</div>
+        </div>
+        
+        <div class="mkp-card">
+            <h3>Programming Book</h3>
+            <div class="card-content">
+                <p><strong>Price:</strong> $39</p>
+                <p><strong>Stock:</strong> 100 units</p>
+                <p><strong>Category:</strong> Education</p>
+                <p><strong>Rating:</strong> 4.5/5</p>
+            </div>
+            <div class="card-meta">Last updated: Last week</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Status Card</h2>
+        <div class="mkp-card">
+            <h3>System Status</h3>
+            <div class="card-content">
+                <p><strong>Active Users:</strong> 1,234</p>
+                <p><strong>Server Load:</strong> 65%</p>
+                <p><strong>Uptime:</strong> 99.9%</p>
+            </div>
+            <div class="card-meta">Status: All systems operational</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Instructions</h2>
+        <ol>
+            <li>Install the Card Detector extension</li>
+            <li>Click the extension icon in your browser toolbar</li>
+            <li>The popup should show 3 detected mkp-card-debit divs (only debit transaction cards)</li>
+            <li>The regular mkp-card divs without mkp-card-debit class should NOT be highlighted</li>
+            <li>Click "Highlight" buttons to focus on each debit card</li>
+            <li>Debit cards should be outlined in orange automatically</li>
+        </ol>
+    </div>
+</body>
+</html>
