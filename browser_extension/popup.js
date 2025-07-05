@@ -1,10 +1,11 @@
-// Popup script to display detected cards
+// Popup script to display detected elements
+
 function renderCards(cards) {
   const container = document.getElementById('cards');
   container.innerHTML = '';
   
   if (!cards || cards.length === 0) {
-    container.innerHTML = '<div class="no-cards">No mkp-card divs found on this page.</div>';
+    container.innerHTML = '<div class="no-cards">No matching elements found on this page.</div>';
     return;
   }
 
@@ -14,7 +15,7 @@ function renderCards(cards) {
     div.className = 'card-item';
     div.innerHTML = `
       <div class="card-header">
-      <strong>Card #${card.id + 1}</strong>
+      <strong>Element #${card.id + 1}</strong>
       <button class="highlight-btn" data-table-id="${card.id}">Highlight</button>
       </div>
       <div class="card-info">
@@ -56,6 +57,55 @@ function escapeHtml(str) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Load current selector and initialize UI
+  loadCurrentSelector().then(() => {
+    // Get cards with current selector
+    refreshCards();
+  });
+
+  // Set up event listeners for configuration
+  document.getElementById('saveSelector').addEventListener('click', saveSelector);
+  document.getElementById('resetSelector').addEventListener('click', resetSelector);
+  document.getElementById('selectorInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      saveSelector();
+    }
+  });
+});
+
+async function loadCurrentSelector() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get([CONFIG.STORAGE_KEY], (result) => {
+      const selector = result[CONFIG.STORAGE_KEY] || CONFIG.DEFAULT_SELECTOR;
+      document.getElementById('currentSelector').textContent = selector;
+      document.getElementById('selectorInput').value = selector;
+      resolve();
+    });
+  });
+}
+
+function saveSelector() {
+  const newSelector = document.getElementById('selectorInput').value.trim();
+  if (!newSelector) {
+    alert('Please enter a valid CSS selector');
+    return;
+  }
+
+  chrome.storage.sync.set({ [CONFIG.STORAGE_KEY]: newSelector }, () => {
+    document.getElementById('currentSelector').textContent = newSelector;
+    refreshCards();
+  });
+}
+
+function resetSelector() {
+  chrome.storage.sync.set({ [CONFIG.STORAGE_KEY]: CONFIG.DEFAULT_SELECTOR }, () => {
+    document.getElementById('currentSelector').textContent = CONFIG.DEFAULT_SELECTOR;
+    document.getElementById('selectorInput').value = CONFIG.DEFAULT_SELECTOR;
+    refreshCards();
+  });
+}
+
+function refreshCards() {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {type: 'GET_CARDS'}, function(response) {
       if (chrome.runtime.lastError) {
@@ -65,4 +115,4 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCards(response && response.cards ? response.cards : []);
     });
   });
-});
+}

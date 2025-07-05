@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Card Detector</title>
+  <title>Element Detector</title>
   <style>
     body { 
       font-family: Arial, sans-serif; 
@@ -74,11 +74,82 @@
       padding: 20px;
       font-style: italic;
     }
+    .config-section {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .config-header {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .config-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+    }
+    .config-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .config-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      flex: 1;
+    }
+    .save-btn {
+      background: #4caf50;
+      color: white;
+    }
+    .save-btn:hover {
+      background: #45a049;
+    }
+    .reset-btn {
+      background: #f44336;
+      color: white;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    .current-selector {
+      font-size: 11px;
+      color: #666;
+      font-family: monospace;
+      background: #f5f5f5;
+      padding: 4px;
+      border-radius: 3px;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
-  <h2>🔍 Card Detector</h2>
+  <h2>🔍 Element Detector</h2>
+  
+  <div class="config-section">
+    <div class="config-header">CSS Selector Configuration</div>
+    <div class="current-selector" id="currentSelector">Loading...</div>
+    <input type="text" class="config-input" id="selectorInput" placeholder="Enter CSS selector (e.g., div.my-card, .product-item, [data-item])">
+    <div class="config-buttons">
+      <button class="config-btn save-btn" id="saveSelector">Save</button>
+      <button class="config-btn reset-btn" id="resetSelector">Reset</button>
+    </div>
+  </div>
+  
   <div id="cards" class="cards-list"></div>
+  <script src="config.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
