@@ -133,10 +133,47 @@
       border-radius: 3px;
       margin-bottom: 8px;
     }
+    .signalr-section {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    .signalr-header {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .signalr-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .status-connected {
+      background: #4CAF50;
+    }
+    .status-disconnected {
+      background: #f44336;
+    }
   </style>
 </head>
 <body>
-  <h2>🔍 Element Detector</h2>
+  <h2>🔍 Browser2Excel</h2>
+  
+  <div class="signalr-section">
+    <div class="signalr-header">🔗 SignalR Connection</div>
+    <div class="signalr-status">
+      <div class="status-indicator status-disconnected"></div>
+      <span id="signalr-status">Disconnected</span>
+    </div>
+  </div>
   
   <div class="config-section">
     <div class="config-header">CSS Selector Configuration</div>
@@ -149,6 +186,7 @@
   </div>
   
   <div id="cards" class="cards-list"></div>
+  
   <script src="config.js"></script>
   <script src="popup.js"></script>
 </body>

@@ -35,7 +35,7 @@ async function findCards() {
   });
 }
 
-// Listen for messages from popup
+// Listen for messages from popup and background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'GET_CARDS') {
     findCards().then(cards => {
@@ -51,6 +51,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         card.style.outline = `3px solid ${CONFIG.HIGHLIGHT_COLORS.normal}`;
       }, 2000);
     }
+  } else if (request.type === 'REQUEST_ELEMENT_DATA') {
+    const currentUrl = window.location.href;
+    console.log(`Request element data at ${currentUrl}:`, request.data);
+    // Extract elements for SignalR transmission
+    findCards().then(cards => {
+      const elementData = cards.map(c => ({ id: c.id, content: c.content }));
+      // Send data back to background script for SignalR transmission
+      chrome.runtime.sendMessage({
+        type: 'RESPONSE_ELEMENT_DATA',
+        data: {
+          url: currentUrl,
+          elements: elementData
+        }
+      });
+    });
   }
   return true;
 });

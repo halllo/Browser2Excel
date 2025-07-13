@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Element Detector",
+  "name": "Browser2Excel",
   "version": "1.0",
-  "description": "Detects elements using configurable CSS selectors, lists them, and highlights them.",
+  "description": "Detects elements using configurable CSS selectors, lists them, highlights them, and sends data to Excel via SignalR.",
   "permissions": ["scripting", "activeTab", "storage"],
   "host_permissions": ["<all_urls>"],
   "action": {
@@ -22,6 +22,12 @@
       "matches": ["<all_urls>"],
       "js": ["config.js", "content.js"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["signalr-client.js", "signalr.min.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

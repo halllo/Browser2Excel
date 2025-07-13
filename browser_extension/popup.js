@@ -1,5 +1,7 @@
 // Popup script to display detected elements
 
+let signalRStatus = { isConnected: false };
+
 function renderCards(cards) {
   const container = document.getElementById('cards');
   container.innerHTML = '';
@@ -62,6 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get cards with current selector
     refreshCards();
   });
+  
+  // Update SignalR status
+  updateSignalRStatus();
+  
+  // Set up periodic status updates
+  setInterval(updateSignalRStatus, 5000);
 
   // Set up event listeners for configuration
   document.getElementById('saveSelector').addEventListener('click', saveSelector);
@@ -114,5 +122,17 @@ function refreshCards() {
       }
       renderCards(response && response.cards ? response.cards : []);
     });
+  });
+}
+
+function updateSignalRStatus() {
+  chrome.runtime.sendMessage({type: 'GET_SIGNALR_STATUS'}, (response) => {
+    signalRStatus = response || { isConnected: false };
+    
+    const statusElement = document.getElementById('signalr-status');
+    if (statusElement) {
+      statusElement.textContent = signalRStatus.isConnected ? 'Connected' : 'Disconnected';
+      statusElement.className = signalRStatus.isConnected ? 'status-connected' : 'status-disconnected';
+    }
   });
 }
