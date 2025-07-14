@@ -4,8 +4,8 @@
   <Version>1.0.0.0</Version>
   <ProviderName>Manuel Naujoks</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="Table Adder"/>
-  <Description DefaultValue="Add remotely detected records to your table."/>
+  <DisplayName DefaultValue="Browser2Excel"/>
+  <Description DefaultValue="Add remotely detected records from your browser to your table."/>
   <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
@@ -23,11 +23,11 @@
     <Hosts>
       <Host xsi:type="Workbook">
         <DesktopFormFactor>
-          <TableAdder>
-            <Title resid="TableAdder.Title"/>
-            <Description resid="TableAdder.Description"/>
-            <LearnMoreUrl resid="TableAdder.LearnMoreUrl"/>
-          </TableAdder>
+          <Browser2Excel>
+            <Title resid="Browser2Excel.Title"/>
+            <Description resid="Browser2Excel.Description"/>
+            <LearnMoreUrl resid="Browser2Excel.LearnMoreUrl"/>
+          </Browser2Excel>
           <FunctionFile resid="Commands.Url"/>
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
             <OfficeTab id="TabHome">
@@ -82,18 +82,18 @@
         <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="TableAdder.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
+        <bt:Url id="Browser2Excel.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
         <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
         <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="TableAdder.Title" DefaultValue="Get started with your sample add-in!"/>
-        <bt:String id="CommandsGroup.Label" DefaultValue="Table Adder"/>
+        <bt:String id="Browser2Excel.Title" DefaultValue="Get started with your sample add-in!"/>
+        <bt:String id="CommandsGroup.Label" DefaultValue="Browser2Excel"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="Show Task Pane"/>
         <bt:String id="ActionButton.Label" DefaultValue="Perform Action"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="TableAdder.Description" DefaultValue="The Table Adder add-in loaded successfully. Go to the HOME tab and click the 'Show Task Pane' button to get started."/>
+        <bt:String id="Browser2Excel.Description" DefaultValue="The Browser2Excel add-in loaded successfully. Go to the HOME tab and click the 'Show Task Pane' button to get started."/>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show a Taskpane"/>
         <bt:String id="ActionButton.Tooltip" DefaultValue="Click to perform an action"/>
       </bt:LongStrings>

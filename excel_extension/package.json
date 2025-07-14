@@ -1,10 +1,6 @@
 {
-  "name": "office-addin-taskpane-js",
+  "name": "Browser2Excel",
   "version": "0.0.1",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/OfficeDev/Office-Addin-TaskPane-JS.git"
-  },
   "license": "MIT",
   "config": {
     "app_to_debug": "excel",

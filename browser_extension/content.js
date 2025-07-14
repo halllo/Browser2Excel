@@ -26,13 +26,24 @@ async function findCards() {
   });
 
   return cards.map((card, idx) => {
-    console.info(`Detected element #${idx + 1} with selector: ${selector}`);
+    //console.info(`Detected element #${idx + 1} with selector: ${selector}`);
     return {
       id: idx,
       content: card.outerHTML,
       element: card,
     };
   });
+}
+
+function highlightCard(cardId) {
+  const card = document.querySelector(`[data-card-detector-id="${cardId}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.outline = `5px solid ${CONFIG.HIGHLIGHT_COLORS.active}`;
+      setTimeout(() => {
+        card.style.outline = `3px solid ${CONFIG.HIGHLIGHT_COLORS.normal}`;
+      }, 2000);
+    }
 }
 
 // Listen for messages from popup and background script
@@ -43,21 +54,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true; // Keep the message channel open for async response
   } else if (request.type === 'HIGHLIGHT_CARD') {
-    const card = document.querySelector(`[data-card-detector-id="${request.cardId}"]`);
-    if (card) {
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.style.outline = `5px solid ${CONFIG.HIGHLIGHT_COLORS.active}`;
-      setTimeout(() => {
-        card.style.outline = `3px solid ${CONFIG.HIGHLIGHT_COLORS.normal}`;
-      }, 2000);
-    }
+    highlightCard(request.cardId);
   } else if (request.type === 'REQUEST_ELEMENT_DATA') {
     const currentUrl = window.location.href;
     console.log(`Request element data at ${currentUrl}:`, request.data);
-    // Extract elements for SignalR transmission
     findCards().then(cards => {
       const elementData = cards.map(c => ({ id: c.id, content: c.content }));
-      // Send data back to background script for SignalR transmission
       chrome.runtime.sendMessage({
         type: 'RESPONSE_ELEMENT_DATA',
         data: {
