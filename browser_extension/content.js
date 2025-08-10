@@ -27,10 +27,17 @@ async function findCards() {
 
   return cards.map((card, idx) => {
     //console.info(`Detected element #${idx + 1} with selector: ${selector}`);
+    const card_content = card.outerHTML.replace(/\s{2,}|\n/g, ' ');
+    const parsed = card_content.match(/data-campid="(?<date>.*?)".*?aria-label="(?<arialabel>.*?)"/);
+    const date = parsed?.groups?.date;
+    const arialabel = parsed?.groups?.arialabel;
+
     return {
       id: idx,
-      content: card.outerHTML,
       element: card,
+      content: card_content,
+      date: date,
+      arialabel: arialabel
     };
   });
 }
@@ -50,7 +57,7 @@ function highlightCard(cardId) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'GET_CARDS') {
     findCards().then(cards => {
-      sendResponse({ cards: cards.map(c => ({ id: c.id, content: c.content })) });
+      sendResponse({ cards: cards.map(c => ({ id: c.id, content: c.content, date: c.date, arialabel: c.arialabel })) });
     });
     return true; // Keep the message channel open for async response
   } else if (request.type === 'HIGHLIGHT_CARD') {
@@ -59,7 +66,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const currentUrl = window.location.href;
     console.log(`Request element data at ${currentUrl}:`, request.data);
     findCards().then(cards => {
-      const elementData = cards.map(c => ({ id: c.id, content: c.content }));
+      const elementData = cards.map(c => ({ id: c.id, content: c.content, date: c.date, arialabel: c.arialabel }));
       chrome.runtime.sendMessage({
         type: 'RESPONSE_ELEMENT_DATA',
         data: {

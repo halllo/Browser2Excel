@@ -12,7 +12,6 @@ function renderCards(cards) {
   }
 
   cards.forEach((card, index) => {
-    const card_content = card.content.replace(/\s{2,}|\n/g, ' ');
     const div = document.createElement('div');
     div.className = 'card-item';
     div.innerHTML = `
@@ -21,12 +20,12 @@ function renderCards(cards) {
       <button class="highlight-btn" data-table-id="${card.id}">Highlight</button>
       </div>
       <div class="card-info">
-      <span>Information</span>
+      <span>${card.date ?? 'Unknown Date'}</span>
       </div>
       <div class="card-content">
-      <code>${escapeHtml(card_content)}</code>
+      <code>${card.arialabel ?? escapeHtml(card.content)}</code>
       </div>
-    `;
+      `;
     
     // Add click event to highlight button
     const highlightBtn = div.querySelector('.highlight-btn');

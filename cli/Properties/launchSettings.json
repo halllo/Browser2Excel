@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "cli": {
+      "commandName": "Project",
+      "commandLineArgs": "get-all"
+    }
+  }
+}
