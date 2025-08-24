@@ -16,7 +16,7 @@ function renderCards(cards) {
     div.className = 'card-item';
     div.innerHTML = `
       <div class="card-header">
-      <strong>Element #${card.id + 1}</strong>
+      <strong>Element #${card.id}</strong>
       <button class="highlight-btn" data-table-id="${card.id}">Highlight</button>
       </div>
       <div class="card-info">

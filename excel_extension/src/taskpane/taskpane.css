@@ -78,3 +78,21 @@
 b {
     font-weight: bold;
 }
+
+/* Table styles with borders */
+.ms-Table-table {
+    border-collapse: collapse;
+    border: 1px solid #c8c6c4;
+    width: 100%;
+}
+
+.ms-Table-cell {
+    border: 1px solid #c8c6c4;
+    padding: 8px 12px;
+}
+
+.ms-Table-cell--header {
+    border-bottom: 2px solid #c8c6c4;
+    background-color: #f3f2f1;
+    font-weight: 600;
+}

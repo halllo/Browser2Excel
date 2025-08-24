@@ -70,13 +70,21 @@ public class Browser2ExcelHub : Hub
 
 	public async Task RequestElementData(JsonDocument data)
 	{
-		logger.LogInformation("Requesting element data {data}", data);
+		logger.LogInformation("Requesting element data {data}", Truncated(JsonSerializer.Serialize(data)));
 		await Clients.All.SendAsync("RequestElementData", data);
 	}
 
 	public async Task ResponseElementData(JsonDocument data)
 	{
-		logger.LogInformation("Received element data {data}", data);
+		logger.LogInformation("Received element data {data}", Truncated(JsonSerializer.Serialize(data)));
 		await Clients.All.SendAsync("ResponseElementData", data);
 	}
+
+	public async Task Highlight(JsonDocument data)
+	{
+		logger.LogInformation("Highlight {data}", Truncated(JsonSerializer.Serialize(data)));
+		await Clients.All.SendAsync("Highlight", data);
+	}
+
+	static string Truncated(string value, int maxLength = 500) => value.Length <= maxLength ? value : value[..maxLength] + "...";
 }

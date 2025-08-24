@@ -62,6 +62,26 @@ class SignalRClient {
         }
       });
     });
+
+    this.connection.on('Highlight', (data) => {
+      const cardId = data?.cardId;
+      if (cardId) {
+        // Send to content script in active tab
+        console.log('Server requesting highlighting for', cardId);
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              type: 'HIGHLIGHT_CARD',
+              cardId: data.cardId
+            });
+          } else {
+            console.warn('No active tab found to highlight element.');
+          }
+        });
+      } else {
+        console.log('Server requesting highlighting, but did not specify cardId.');
+      }
+    });
   }
 
   async start() {

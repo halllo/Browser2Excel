@@ -1,6 +1,7 @@
 /* global console, document, Excel, Office, signalR */
 
-// SignalR connection
+import { Transaction, RawTransaction, Response } from './parser.js';
+
 let connection = null;
 
 Office.onReady((info) => {
@@ -8,23 +9,27 @@ Office.onReady((info) => {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     document.getElementById("run").onclick = run;
+
+    const tableBody = document.getElementById('data-table-body');
+    tableBody.addEventListener('click', function (e) {
+        let row = e.target.closest('tr');
+        if (row && row.parentNode === tableBody) {
+            onTableRowClicked(row);
+        }
+    });
     
-    // Initialize SignalR connection
     initializeSignalR();
   }
 });
 
 async function initializeSignalR() {
   try {
-    // Create a new SignalR connection
     connection = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:7026/hub")
       .withAutomaticReconnect()
       .build();
 
-    // Set up event handlers
     connection.on("ResponseElementData", function (data) {
-      console.log("Data received from SignalR:", data);
       handleResponseElementDataFromSignalR(data);
     });
 
@@ -40,7 +45,6 @@ async function initializeSignalR() {
       console.log("SignalR connection closed.", error);
     });
 
-    // Start the connection
     await connection.start();
     console.log("SignalR connection started successfully.");
 
@@ -49,28 +53,27 @@ async function initializeSignalR() {
   }
 }
 
-async function handleResponseElementDataFromSignalR(data) {
+async function run() {
   try {
     await Excel.run(async (context) => {
-      // Example: Insert data into the active worksheet
-      const worksheet = context.workbook.worksheets.getActiveWorksheet();
-      
-      // You can customize this based on your data structure
-      if (Array.isArray(data)) {
-        // If data is an array, insert it as a table
-        const range = worksheet.getCell(0, 0).getResizedRange(data.length - 1, data[0].length - 1);
-        range.values = data;
-      } else {
-        // If data is a single value or object, insert it in the selected cell
-        const range = context.workbook.getSelectedRange();
-        range.values = [[JSON.stringify(data)]];
-      }
-
+      // Read the range address and values
+      const range = context.workbook.getSelectedRange();
+      range.load("address");
+      range.load("values");
       await context.sync();
-      console.log("Data inserted into Excel successfully.");
+
+      console.log(`The range address was ${range.address}.`);
+      
+      const rangeData = {
+        address: range.address,
+        values: range.values,
+        timestamp: new Date().toISOString()
+      };
+      
+      await requestElementData(rangeData);
     });
   } catch (error) {
-    console.error("Error inserting data into Excel:", error);
+    console.error(error);
   }
 }
 
@@ -87,33 +90,82 @@ async function requestElementData(data) {
   }
 }
 
-async function run() {
+async function handleResponseElementDataFromSignalR(data) {
   try {
-    await Excel.run(async (context) => {
-      /**
-       * Insert your Excel code here
-       */
-      const range = context.workbook.getSelectedRange();
+    console.log("Processing received data:", data);
+    clearTransactionTable();
 
-      // Read the range address and values
-      range.load("address");
-      range.load("values");
-
-      // Update the fill color
-      range.format.fill.color = "yellow";
-
-      await context.sync();
-      console.log(`The range address was ${range.address}.`);
-      
-      const rangeData = {
-        address: range.address,
-        values: range.values,
-        timestamp: new Date().toISOString()
-      };
-      
-      await requestElementData(rangeData);
+    const response = new Response(data.url, data.elements.map(element => new RawTransaction(element.id, element.content, element.date, element.arialabel)));
+    const parsedTransactions = response.display();
+    parsedTransactions.forEach(transaction => {
+      addTransactionRow(transaction.id, transaction.description, transaction.kind, transaction.frequency, transaction.date, transaction.amount);
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("Error processing received data:", error);
+  }
+}
+
+function addTransactionRow(id, description, kind, frequency, date, amount) {
+  const tableBody = document.getElementById("data-table-body");
+  
+  // Create a new row
+  const row = document.createElement("tr");
+  row.className = "ms-Table-row";
+  row.id = "transaction_" + id;
+
+  // Create cells
+  const idCell = document.createElement("td");
+  idCell.className = "ms-Table-cell";
+  idCell.textContent = id || '';
+  row.appendChild(idCell);
+    
+  const descriptionCell = document.createElement("td");
+  descriptionCell.className = "ms-Table-cell";
+  descriptionCell.textContent = description || '';
+  row.appendChild(descriptionCell);
+  
+  const kindCell = document.createElement("td");
+  kindCell.className = "ms-Table-cell";
+  kindCell.textContent = kind || '';
+  row.appendChild(kindCell);
+  
+  const frequencyCell = document.createElement("td");
+  frequencyCell.className = "ms-Table-cell";
+  frequencyCell.textContent = frequency || '';
+  row.appendChild(frequencyCell);
+  
+  const dateCell = document.createElement("td");
+  dateCell.className = "ms-Table-cell";
+  dateCell.textContent = date || '';
+  row.appendChild(dateCell);
+  
+  const amountCell = document.createElement("td");
+  amountCell.className = "ms-Table-cell";
+  amountCell.textContent = (typeof amount === 'number' ? amount : parseFloat(amount)).toFixed(2);
+  row.appendChild(amountCell);
+  
+  // Add row to the table body
+  tableBody.appendChild(row);
+}
+
+function clearTransactionTable() {
+  const tableBody = document.getElementById("data-table-body");
+  tableBody.innerHTML = "";
+}
+
+async function onTableRowClicked(row) {
+  try {
+    if (connection && connection.state === signalR.HubConnectionState.Connected) {
+      console.info('row clicked', row);
+      const idMatch = row.id.match(/^transaction_(.+)$/);
+      const data = { cardId: idMatch ? idMatch[1] : row.id };
+      await connection.invoke("Highlight", data);
+      console.log("Request sent to SignalR hub:", data);
+    } else {
+      console.warn("SignalR connection is not established.");
+    }
+  } catch (error) {
+    console.error("Error sending data to SignalR hub:", error);
   }
 }
