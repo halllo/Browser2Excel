@@ -25,10 +25,6 @@ Excel add-ins are integrations built by third parties into Excel by using [Excel
 
     Once you are finished testing and debugging the add-in, select **Stop Previewing Your Office Add-in**. This closes the web server and removes the add-in from the registry and cache.
 
-## Use the add-in project
-
-The add-in project that you've created contains code for a basic task pane add-in.
-
 ## Explore the add-in code
 
 To explore an Office add-in project, you can start with the key files listed below.
@@ -50,23 +46,3 @@ If you still have problems, see [troubleshoot development errors](https://learn.
 For information on running the add-in on Excel on the web, see [Sideload Office Add-ins to Office on the web](https://learn.microsoft.com/office/dev/add-ins/testing/sideload-office-add-ins-for-testing).
 
 For information on debugging on older versions of Office, see [Debug add-ins using developer tools in Microsoft Edge Legacy](https://learn.microsoft.com/office/dev/add-ins/testing/debug-add-ins-using-devtools-edge-legacy).
-
-## Make code changes
-
-All the information about Office Add-ins is found in our [official documentation](https://learn.microsoft.com/office/dev/add-ins/overview/office-add-ins). You can also explore more samples in the Office Add-ins Development Kit. Select **View Samples** to see more samples of real-world scenarios.
-
-If you edit the manifest as part of your changes, use the **Validate Manifest File** option in the Office Add-ins Development Kit. This shows you errors in the manifest syntax.
-
-## Engage with the team
-
-Did you experience any problems? [Create an issue](https://aka.ms/officedevkitnewissue) and we'll help you out.
-
-Want to learn more about new features and best practices for the Office platform? [Join the Microsoft Office Add-ins community call](https://learn.microsoft.com/office/dev/add-ins/overview/office-add-ins-community-call).
-
-## Copyright
-
-Copyright (c) 2024 Microsoft Corporation. All rights reserved.
-
-## Disclaimer
-
-**THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
