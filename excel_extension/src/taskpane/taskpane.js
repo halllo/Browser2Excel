@@ -222,14 +222,21 @@ async function addTransactionToExcel(id, description, kind, frequency, date, amo
         const existingRows = table.rows.items;
         let insertIndex = existingRows.length; // Default to appending at the end
 
-        for (let i = 0; i < existingRows.length; i++) {
-          const row = existingRows[i];
-          row.load("values");
+        // Load all date column values at once for better performance
+        if (existingRows.length > 0) {
+          const dateColumnRange = table.columns.getItemAt(dateColumnIndex).getDataBodyRange();
+          dateColumnRange.load("values");
           await context.sync();
-          const rowDateValue = row.values[0][dateColumnIndex];
-          if (rowDateValue && dateToExcelSerial(rowDateValue) > dateToExcelSerial(date)) {
-            insertIndex = i;
-            break;
+          const dateValues = dateColumnRange.values;
+
+          // Find the correct insertion point by comparing dates
+          const newDateSerial = dateToExcelSerial(date);
+          for (let i = 6906; i < dateValues.length; i++) {
+            const rowDateValue = dateValues[i][0];
+            if (rowDateValue && dateToExcelSerial(rowDateValue) > newDateSerial) {
+              insertIndex = i + 1; // +1 because we're skipping the header row in the range
+              break;
+            }
           }
         }
         console.debug("Inserting new row at index:", insertIndex);
@@ -248,9 +255,23 @@ async function addTransactionToExcel(id, description, kind, frequency, date, amo
         const rowValues = columnNames.map(colName => valueMap[colName] ?? null );
         
         // Add a new row to the table
-        table.rows.add(insertIndex, [rowValues]);
+        const newRow = table.rows.add(insertIndex, [rowValues]);
         await context.sync();
         console.info("Transaction added to Excel table:", insertIndex, rowValues);
+        
+        // Apply strikethrough style to the HTML row
+        const htmlRow = document.getElementById("transaction_" + id);
+        if (htmlRow) {
+          htmlRow.style.textDecoration = "line-through";
+          htmlRow.style.opacity = "0.6";
+          
+          // Disable the Add button
+          const addButton = htmlRow.querySelector("button");
+          if (addButton) {
+            addButton.disabled = true;
+            addButton.textContent = "Added";
+          }
+        }
       } else {
         console.warn("No table found on the active worksheet.");
       }
@@ -284,21 +305,16 @@ function dateToExcelSerial(dateString) {
     const month = parseInt(parts[1], 10) - 1; // JavaScript months are 0-indexed
     const year = parseInt(parts[2], 10);
     
-    const date = new Date(year, month, day);
+    // Use UTC to avoid daylight saving time issues
+    const date = new Date(Date.UTC(year, month, day));
     
     // Excel's epoch is January 1, 1900, but Excel starts counting from 1 (not 0)
     // So January 1, 1900 = 1, January 2, 1900 = 2, etc.
-    const excelEpoch = new Date(1899, 11, 30); // December 30, 1899 (one day before)
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30)); // December 30, 1899 (one day before)
     
     // Calculate days difference
     const timeDiff = date.getTime() - excelEpoch.getTime();
     const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    
-    // Excel incorrectly treats 1900 as a leap year
-    // For dates after February 28, 1900, add 1 to account for the fake leap day
-    if (date >= new Date(1900, 2, 1)) { // March 1, 1900 or later
-      return daysDiff + 1;
-    }
     
     return daysDiff;
   } catch (error) {
