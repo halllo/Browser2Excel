@@ -35,9 +35,16 @@
         <h2 class="ms-font-xl">Please <a target="_blank" href="https://learn.microsoft.com/office/dev/add-ins/testing/test-debug-office-add-ins#sideload-an-office-add-in-for-testing">sideload</a> your add-in to see app body.</h2>
     </section>
     <main id="app-body" class="ms-welcome__main" style="display: none;">
-        <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
-            <span class="ms-Button-label">Get</span>
+        <div role="button" id="runBrowser" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+            <span class="ms-Button-label">Get from Browser</span>
         </div>
+        <div role="button" id="runKreditkartenabrechnung" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+            <span class="ms-Button-label">Get from Kreditkartenabrechnung</span>
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".pdf" class="file-input" />
+            </div>
+        </div>
+        <br>
         
         <div class="ms-Table">
             <table class="ms-Table-table">

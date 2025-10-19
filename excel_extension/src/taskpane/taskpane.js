@@ -8,7 +8,8 @@ Office.onReady((info) => {
   if (info.host === Office.HostType.Excel) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    document.getElementById("run").onclick = run;
+    document.getElementById("runBrowser").onclick = runBrowser;
+    document.getElementById("runKreditkartenabrechnung").onclick = runKreditkartenabrechnung;
 
     const tableBody = document.getElementById('data-table-body');
     tableBody.addEventListener('click', function (e) {
@@ -53,7 +54,7 @@ async function initializeSignalR() {
   }
 }
 
-async function run() {
+async function runBrowser() {
   try {
     await Excel.run(async (context) => {
       // Read the range address and values
@@ -71,6 +72,39 @@ async function run() {
       };
       
       await requestElementData(rangeData);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function runKreditkartenabrechnung() {
+  try {
+    await Excel.run(async (context) => {
+      // Read the range address and values
+      const range = context.workbook.getSelectedRange();
+      range.load("address");
+      range.load("values");
+      await context.sync();
+
+      // Get the currently selected file from the file input
+      const fileInput = document.getElementById("fileInput");
+      const selectedFile = fileInput.files[0]; // Get the first (and typically only) selected file
+      
+      if (selectedFile) {
+        console.info("Selected file:", selectedFile);
+        
+        // todo: upload file to API and wait for its extraction response
+        
+        // const rangeData = {
+        //   address: range.address,
+        //   values: range.values,
+        //   timestamp: new Date().toISOString()
+        // };
+        //await requestElementData(rangeData);
+      } else {
+        console.warn("No file selected");
+      }
     });
   } catch (error) {
     console.error(error);
