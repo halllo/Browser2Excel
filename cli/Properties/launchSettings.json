@@ -2,7 +2,8 @@
   "profiles": {
     "cli": {
       "commandName": "Project",
-      "commandLineArgs": "get-all"
+      //"commandLineArgs": "get-all",
+      "commandLineArgs": "extract \"C:\\Users\\manue\\OneDrive\\Desktop\\5232xxxxxxxx7521_Abrechnung_vom_14_02_2025_Naujoks_Manuel.PDF\""
     }
   }
 }

@@ -418,3 +418,4 @@ FodyWeavers.xsd
 *.msp
 
 detection-rules.json
+appsettings.Development.json
