@@ -78,122 +78,137 @@ class RawTransaction {
 }
 
 /**
- * Response class containing URL and transaction elements
+ * Helper function to check if a string contains a substring (case-insensitive)
+ * @param {string} full - The full string to search in
+ * @param {string} substring - The substring to search for
+ * @returns {boolean} True if substring is found
  */
-class Response {
-    constructor(url = '', elements = []) {
-        this.url = url;
-        this.elements = elements;
-    }
+function isSub(full, substring) {
+    return full.toLowerCase().includes(substring.toLowerCase());
+}
 
-    /**
-     * Helper function to check if a string contains a substring (case-insensitive)
-     * @param {string} full - The full string to search in
-     * @param {string} substring - The substring to search for
-     * @returns {boolean} True if substring is found
-     */
-    static isSub(full, substring) {
-        return full.toLowerCase().includes(substring.toLowerCase());
-    }
+function seemsLike(test, target) {
+    return false;
+}
 
-    static seemsLike(test, target) {
+/**
+ * Apply detection rules to classify transactions
+ * @param {string} receiver - The receiver field
+ * @param {string} topic - The topic field
+ * @returns {Object} Object with description, kind, and frequency
+ */
+function applyDetectionRules(transaction, receiver, topic, svg) {
+    const conditionEval = function(condition) {
+        const fieldValue = condition.field === "svg" ? svg : condition.field === "receiver" ? receiver : topic;
+        if (fieldValue && condition.contains) {
+            return isSub(fieldValue, condition.contains);
+        } else if (fieldValue && condition.seemslike) {
+            console.info(`TODO: does ${fieldValue} seem like ${condition.seemslike}?`, transaction);
+            return seemsLike(fieldValue, condition.seemslike);
+        }
         return false;
     }
+    
+    // Check each rule in order
+    for (const rule of detectionRules.rules) {
+        let ruleMatches = false;
 
-    /**
-     * Apply detection rules to classify transactions
-     * @param {string} receiver - The receiver field
-     * @param {string} topic - The topic field
-     * @returns {Object} Object with description, kind, and frequency
-     */
-    static applyDetectionRules(transaction, receiver, topic, svg) {
-        const { isSub, seemsLike } = Response;
-        const conditionEval = function(condition) {
-            const fieldValue = condition.field === "svg" ? svg : condition.field === "receiver" ? receiver : topic;
-            if (fieldValue && condition.contains) {
-                return isSub(fieldValue, condition.contains);
-            } else if (fieldValue && condition.seemslike) {
-                console.info(`TODO: does ${fieldValue} seem like ${condition.seemslike}?`, transaction);
-                return seemsLike(fieldValue, condition.seemslike);
-            }
-            return false;
-        }
+        // If no operator is specified, default to AND behavior
+        const operator = rule.operator || "AND";
         
-        // Check each rule in order
-        for (const rule of detectionRules.rules) {
-            let ruleMatches = false;
-
-            // If no operator is specified, default to AND behavior
-            const operator = rule.operator || "AND";
-            
-            if (operator === "OR") {
-                // Any condition must match (OR)
-                ruleMatches = rule.conditions.some(conditionEval);
-            } else {
-                // All conditions must match (AND)
-                ruleMatches = rule.conditions.every(conditionEval);
-            }
-
-            if (ruleMatches) {
-                // Replace placeholders in result
-                const result = {
-                    description: rule.result.description.replace('${receiver}', receiver).replace('${topic}', topic),
-                    kind: rule.result.kind,
-                    frequency: rule.result.frequency
-                };
-                return result;
-            }
+        if (operator === "OR") {
+            // Any condition must match (OR)
+            ruleMatches = rule.conditions.some(conditionEval);
+        } else {
+            // All conditions must match (AND)
+            ruleMatches = rule.conditions.every(conditionEval);
         }
+
+        if (ruleMatches) {
+            // Replace placeholders in result
+            const result = {
+                description: rule.result.description.replace('${receiver}', receiver).replace('${topic}', topic),
+                kind: rule.result.kind,
+                frequency: rule.result.frequency
+            };
+            return result;
+        }
+    }
+    
+    // No rule matched, use default
+    const defaultResult = {
+        description: detectionRules.defaultRule.description.replace('${receiver}', receiver).replace('${topic}', topic),
+        kind: detectionRules.defaultRule.kind,
+        frequency: detectionRules.defaultRule.frequency
+    };
+    return defaultResult;
+}
+
+/**
+ * Get displayable transactions from browser response
+ */
+function parseBrowserResponse(data) {
+    console.log("Parsing data:", data);
+    const url = data.url;
+    const elements = data.elements.map(element => new RawTransaction(element.id, element.content, element.date, element.arialabel));
+    
+    // Filter transactions with valid dates and reverse order
+    const validTransactions = elements
+        .filter(t => t.parsedDate !== null)
+        .reverse();
+
+    const results = [];
+
+    for (const transaction of validTransactions) {
+        const { receiver, topic, amount } = transaction.details();
+
+        // Format date as dd/MM/yyyy
+        const date = transaction.parsedDate?.toLocaleDateString('en-GB');
+
+        const svgMatch = transaction.content.match(/<svg.*?>(.*?)<\/svg>/)
+        const svg = svgMatch?.[0];
+
+        // Apply detection rules to get description, kind, and frequency
+        const { description, kind, frequency } = applyDetectionRules(transaction, receiver, topic, svg);
         
-        // No rule matched, use default
-        const defaultResult = {
-            description: detectionRules.defaultRule.description.replace('${receiver}', receiver).replace('${topic}', topic),
-            kind: detectionRules.defaultRule.kind,
-            frequency: detectionRules.defaultRule.frequency
-        };
-        return defaultResult;
+        const result = new Transaction(
+            transaction.id,
+            description,
+            kind,
+            frequency,
+            date,
+            amount,
+            svg
+        );
+        results.push(result);
     }
 
-    /**
-     * Get displayable transactions with categorization logic
-     */
-    display() {
-        const { applyDetectionRules } = Response;
-        
-        // Filter transactions with valid dates and reverse order
-        const validTransactions = this.elements
-            .filter(t => t.parsedDate !== null)
-            .reverse();
+    return results;
+}
 
-        const results = [];
-
-        for (const transaction of validTransactions) {
-            const { receiver, topic, amount } = transaction.details();
-
-            // Format date as dd/MM/yyyy
-            const date = transaction.parsedDate?.toLocaleDateString('en-GB');
-
-            const svgMatch = transaction.content.match(/<svg.*?>(.*?)<\/svg>/)
-            const svg = svgMatch?.[0];
-
-            // Apply detection rules to get description, kind, and frequency
-            const { description, kind, frequency } = applyDetectionRules(transaction, receiver, topic, svg);
-            
-            const result = new Transaction(
-                transaction.id,
-                description,
-                kind,
-                frequency,
-                date,
-                amount,
-                svg
-            );
-            results.push(result);
-        }
-
-        return results;
+/**
+ * Get displayable transactions from /extract response.
+ */
+function parseExtractResponse(data) {
+    console.log("Parsing data:", data);
+    const results = [];
+    for (const [index, booking] of data.bookings.entries()) {
+        const date = (new Date(booking.buchungsDatum)).toLocaleDateString('en-GB');
+        const { description, kind, frequency } = applyDetectionRules(booking, booking.zweck, booking.zweck, undefined);
+        const result = new Transaction(
+            index,
+            description,
+            kind,
+            frequency,
+            date,
+            booking.betragInEuro,
+            undefined
+        );
+        results.push(result);
     }
+
+    return results;
 }
 
 // ES6 exports
-export { Transaction, RawTransaction, Response };
+export { parseBrowserResponse, parseExtractResponse };

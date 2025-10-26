@@ -49,16 +49,19 @@ app.MapGet("/hello", () =>
 	return Results.Ok(new { text = "Hello World!" });
 });
 
-app.MapPost("/extract", async (HttpRequest request, IAgent agent) =>
+app.MapPost("/extract", async (HttpRequest request, IAgent agent, ILogger<Program> logger) =>
 {
 	if (!request.HasFormContentType || request.Form.Files.Count == 0)
 	{
 		return Results.BadRequest(new { error = "No file uploaded." });
 	}
 
-	using var memoryStream = new MemoryStream();
 	var file = request.Form.Files[0];
+	logger.LogInformation("Starting extraction from {File}", file.FileName);
+
+	using var memoryStream = new MemoryStream();
 	await file.CopyToAsync(memoryStream);
+	memoryStream.Position = 0;
 
 	using var document = Document.From(memoryStream, file.FileName);
 	CreditCardStatement? creditCardStatement = default;
@@ -69,11 +72,12 @@ app.MapPost("/extract", async (HttpRequest request, IAgent agent) =>
 			Tool.From(toolName: "CreditCardStatement", tool: [Description("Understand the credit card statement.")]
 			(CreditCardStatement c, Tool.Context context) =>
 			{
-				context.Cancelled = true;
+				context.Suspend();
 				creditCardStatement = c;
 			}),
 		]);
 
+	logger.LogInformation($"Successfully extracted {creditCardStatement?.Bookings.Length} bookings from {{File}}", file.FileName);
 	return Results.Ok(creditCardStatement);
 });
 
@@ -132,5 +136,5 @@ public class Browser2ExcelHub : Hub
 	static string Truncated(string value, int maxLength = 500) => value.Length <= maxLength ? value : value[..maxLength] + "...";
 }
 
-record CreditCardStatement(DateTime Start, DateTime End, string Number, Booking[] Bookings, [property: Description("Pay attention if its positive or negative.")] Amount NewSaldo);
-record Booking(DateTime BelegDatum, DateTime BuchungsDatum, string Zweck, Amount BetragInEuro, string? Waehrung = null, Amount? Betrag = null, string? Kurs = null, Amount? WaehrungsumrechnungInEuro = null);
+record CreditCardStatement(DateTime Start, DateTime End, string Number, Booking[] Bookings, decimal NewSaldo);
+record Booking(DateTime BelegDatum, DateTime BuchungsDatum, string Zweck, decimal BetragInEuro, string? Waehrung = null, decimal? Betrag = null, string? Kurs = null, decimal? WaehrungsumrechnungInEuro = null, bool Positive = false);

@@ -1,6 +1,6 @@
 /* global console, document, Excel, Office, signalR */
 
-import { Transaction, RawTransaction, Response } from './parser.js';
+import { parseBrowserResponse, parseExtractResponse } from './parser.js';
 
 let connection = null;
 
@@ -93,15 +93,34 @@ async function runKreditkartenabrechnung() {
       
       if (selectedFile) {
         console.info("Selected file:", selectedFile);
+
+        // Show loading indicator
+        showLoadingIndicator("Processing file...");
         
-        // todo: upload file to API and wait for its extraction response
-        
-        // const rangeData = {
-        //   address: range.address,
-        //   values: range.values,
-        //   timestamp: new Date().toISOString()
-        // };
-        //await requestElementData(rangeData);
+        try {
+          const formData = new FormData();
+          formData.append('file', selectedFile, selectedFile.name.toLowerCase());
+          console.log("Uploading file to API:", selectedFile.name, "Size:", selectedFile.size);
+          
+          const extractResponse = await fetch('https://localhost:7026/extract', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (!extractResponse.ok) {
+            throw new Error(`HTTP error! status: ${extractResponse.status} ${extractResponse.statusText}`);
+          }
+          
+          const jsonResult = await extractResponse.json();
+          
+          clearTransactionTable();
+          parseExtractResponse(jsonResult).forEach(transaction => {
+            addTransactionRow(transaction.id, transaction.description, transaction.kind, transaction.frequency, transaction.date, transaction.amount);
+          });
+        } finally {
+          // Hide loading indicator regardless of success or failure
+          hideLoadingIndicator();
+        }
       } else {
         console.warn("No file selected");
       }
@@ -126,12 +145,8 @@ async function requestElementData(data) {
 
 async function handleResponseElementDataFromSignalR(data) {
   try {
-    console.log("Processing received data:", data);
     clearTransactionTable();
-
-    const response = new Response(data.url, data.elements.map(element => new RawTransaction(element.id, element.content, element.date, element.arialabel)));
-    const parsedTransactions = response.display();
-    parsedTransactions.forEach(transaction => {
+    parseBrowserResponse(data).forEach(transaction => {
       addTransactionRow(transaction.id, transaction.description, transaction.kind, transaction.frequency, transaction.date, transaction.amount);
     });
 
@@ -265,10 +280,12 @@ async function addTransactionToExcel(id, description, kind, frequency, date, amo
 
           // Find the correct insertion point by comparing dates
           const newDateSerial = dateToExcelSerial(date);
-          for (let i = 6906; i < dateValues.length; i++) {
+          const startAtRow = 7700;//to speed things up
+          for (let i = startAtRow; i < dateValues.length; i++) {
             const rowDateValue = dateValues[i][0];
             if (rowDateValue && dateToExcelSerial(rowDateValue) > newDateSerial) {
-              insertIndex = i + 1; // +1 because we're skipping the header row in the range
+              //insertIndex = i + 1; // +1 because we're skipping the header row in the range
+              insertIndex = i; //actually not plus 1, since we start counting at row 7700
               break;
             }
           }
@@ -355,4 +372,29 @@ function dateToExcelSerial(dateString) {
     console.error("Error converting date to Excel serial:", error);
     return dateString; // Return original string if conversion fails
   }
+}
+
+/**
+ * Show loading indicator with optional custom message
+ * @param {string} message - Optional loading message to display
+ */
+function showLoadingIndicator(message = "Loading...") {
+  const loadingContainer = document.getElementById("loading-indicator");
+  const loadingText = loadingContainer.querySelector(".loading-text");
+  
+  if (loadingText) {
+    loadingText.textContent = message;
+  }
+  
+  loadingContainer.style.display = "flex";
+  console.log("Loading indicator shown:", message);
+}
+
+/**
+ * Hide loading indicator
+ */
+function hideLoadingIndicator() {
+  const loadingContainer = document.getElementById("loading-indicator");
+  loadingContainer.style.display = "none";
+  console.log("Loading indicator hidden");
 }

@@ -27,24 +27,26 @@
 </head>
 
 <body class="ms-font-m ms-welcome ms-Fabric">
-    <header class="ms-welcome__header ms-bgColor-neutralLighter">
-        <img width="90" height="90" src="../../assets/logo-filled.png" alt="Contoso" title="Contoso" />
-        <h1 class="ms-font-su">Transactions</h1>
-    </header>
     <section id="sideload-msg" class="ms-welcome__main">
         <h2 class="ms-font-xl">Please <a target="_blank" href="https://learn.microsoft.com/office/dev/add-ins/testing/test-debug-office-add-ins#sideload-an-office-add-in-for-testing">sideload</a> your add-in to see app body.</h2>
     </section>
     <main id="app-body" class="ms-welcome__main" style="display: none;">
         <div role="button" id="runBrowser" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
-            <span class="ms-Button-label">Get from Browser</span>
+            <span class="ms-Button-label">Get from Kontoauszug browser tab</span>
         </div>
         <div role="button" id="runKreditkartenabrechnung" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
             <span class="ms-Button-label">Get from Kreditkartenabrechnung</span>
-            <div class="file-input-wrapper">
-                <input type="file" id="fileInput" accept=".pdf" class="file-input" />
-            </div>
+        </div>
+        <div class="file-input-wrapper">
+            <input type="file" id="fileInput" accept=".pdf" class="file-input" />
         </div>
         <br>
+        
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="loading-container" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing file...</div>
+        </div>
         
         <div class="ms-Table">
             <table class="ms-Table-table">
